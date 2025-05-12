@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/custom.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap text-primary-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">StudyplannerAI</span>
+                    </div>
+                    <nav class="hidden md:ml-6 md:flex md:space-x-8">
+                        <a href="/" class="border-primary-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Home
+                        </a>
+                        <a href="#about" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            About
+                        </a>
+                        <a href="#examples" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Examples
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Hero Section -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="px-4 py-5 sm:p-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Generate AI-Powered Study Plans</h1>
+                <p class="text-gray-600 mb-4">Create a personalized learning roadmap based on research and your specific needs</p>
+                
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <form id="studyPlanForm" class="space-y-6">
+                        <div>
+                            <label for="topic" class="block text-sm font-medium text-gray-700">Topic *</label>
+                            <div class="mt-1">
+                                <input type="text" name="topic" id="topic" required
+                                    class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                    placeholder="e.g., Machine Learning, Web Development, Python Programming">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Enter the main topic you want to study</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="duration" class="block text-sm font-medium text-gray-700">Duration (weeks)</label>
+                                <select id="duration" name="duration_weeks" 
+                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <option value="1">1 week</option>
+                                    <option value="2">2 weeks</option>
+                                    <option value="4" selected>4 weeks</option>
+                                    <option value="8">8 weeks</option>
+                                    <option value="12">12 weeks</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="depth" class="block text-sm font-medium text-gray-700">Level of Detail</label>
+                                <select id="depth" name="depth_level" 
+                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <option value="1">Basic (1)</option>
+                                    <option value="2">Introductory (2)</option>
+                                    <option value="3" selected>Standard (3)</option>
+                                    <option value="4">Detailed (4)</option>
+                                    <option value="5">Comprehensive (5)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="learning_style" class="block text-sm font-medium text-gray-700">Learning Style</label>
+                                <select id="learning_style" name="learning_style" 
+                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <option value="">Not specified</option>
+                                    <option value="visual">Visual</option>
+                                    <option value="auditory">Auditory</option>
+                                    <option value="reading_writing">Reading/Writing</option>
+                                    <option value="kinesthetic">Kinesthetic (Hands-on)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="prior_knowledge" class="block text-sm font-medium text-gray-700">Prior Knowledge</label>
+                                <select id="prior_knowledge" name="prior_knowledge" 
+                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <option value="">Not specified</option>
+                                    <option value="none">None</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="goals" class="block text-sm font-medium text-gray-700">Learning Goals</label>
+                            <div class="mt-1">
+                                <textarea id="goals" name="goals" rows="3"
+                                    class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                    placeholder="Optional: Enter specific learning goals separated by commas"></textarea>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">What do you want to achieve by studying this topic?</p>
+                        </div>
+
+                        <div>
+                            <label for="additional_context" class="block text-sm font-medium text-gray-700">Additional Context</label>
+                            <div class="mt-1">
+                                <textarea id="additional_context" name="additional_context" rows="3"
+                                    class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                    placeholder="Optional: Any additional information or requirements"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="include_resources" name="include_resources" type="checkbox" checked
+                                    class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="include_resources" class="font-medium text-gray-700">Include Learning Resources</label>
+                                <p class="text-gray-500">Provide recommended books, courses, videos, etc.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" 
+                                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                Generate Study Plan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden bg-white p-8 rounded-lg shadow-md text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mb-4"></div>
+            <p class="text-gray-700">Generating your personalized study plan...</p>
+            <p class="text-sm text-gray-500 mt-2">This may take a minute as we research your topic and create a detailed plan.</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="border-b border-gray-200">
+                <div class="px-4 py-5 sm:px-6">
+                    <h2 class="text-2xl font-bold text-gray-900" id="resultTitle">Your Study Plan</h2>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500" id="resultSubtitle">Generated based on your requirements</p>
+                </div>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Summary</h3>
+                    <p id="planSummary" class="text-gray-700"></p>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Learning Objectives</h3>
+                    <ul id="learningObjectives" class="list-disc pl-5 text-gray-700 space-y-1"></ul>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Key Concepts</h3>
+                    <ul id="keyConcepts" class="list-disc pl-5 text-gray-700 space-y-1"></ul>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Weekly Milestones</h3>
+                    <div id="milestones" class="space-y-4"></div>
+                </div>
+
+                <div id="resourcesSection" class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Recommended Resources</h3>
+                    <div id="resources" class="space-y-3"></div>
+                </div>
+
+                <div id="recommendationsSection" class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Additional Recommendations</h3>
+                    <p id="recommendations" class="text-gray-700"></p>
+                </div>
+
+                <div class="mt-6">
+                    <button id="printButton" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fas fa-print mr-2"></i> Print Study Plan
+                    </button>
+                    <button id="downloadButton" 
+                        class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fas fa-download mr-2"></i> Download as PDF
+                    </button>
+                    <button id="newPlanButton" 
+                        class="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fas fa-plus mr-2"></i> Create New Plan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples Section -->
+        <div id="examples" class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="px-4 py-5 sm:p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Example Study Plans</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Example 1 -->
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">Web Development</h3>
+                        <p class="text-gray-600 mb-3">12-week comprehensive roadmap from basics to full-stack</p>
+                        <button class="example-btn text-primary-600 hover:text-primary-800" data-topic="Web Development">
+                            Use as Template <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Example 2 -->
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">Data Science</h3>
+                        <p class="text-gray-600 mb-3">8-week journey into data analysis and visualization</p>
+                        <button class="example-btn text-primary-600 hover:text-primary-800" data-topic="Data Science">
+                            Use as Template <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Example 3 -->
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">Mobile App Development</h3>
+                        <p class="text-gray-600 mb-3">4-week intensive focus on React Native fundamentals</p>
+                        <button class="example-btn text-primary-600 hover:text-primary-800" data-topic="Mobile App Development with React Native">
+                            Use as Template <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div id="about" class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="px-4 py-5 sm:p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">About StudyplannerAI</h2>
+                
+                <p class="text-gray-700 mb-4">
+                    StudyplannerAI helps you create personalized study plans for any topic by combining advanced AI 
+                    with comprehensive web research. Our tool analyzes the latest information and best learning 
+                    practices to generate a structured roadmap tailored to your needs.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <div class="border border-gray-200 rounded-lg p-4 text-center">
+                        <div class="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-search text-primary-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-2">Research-Based</h3>
+                        <p class="text-gray-600 text-sm">Uses real-time web research to find the most relevant and up-to-date learning paths</p>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4 text-center">
+                        <div class="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-brain text-primary-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-2">AI-Powered</h3>
+                        <p class="text-gray-600 text-sm">Leverages advanced AI to structure content optimally for effective learning</p>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4 text-center">
+                        <div class="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-graduate text-primary-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-2">Personalized</h3>
+                        <p class="text-gray-600 text-sm">Adapts to your learning style, prior knowledge, and specific goals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500 text-sm">
+                &copy; 2025 StudyplannerAI. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+</body>
+</html>
