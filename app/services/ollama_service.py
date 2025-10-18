@@ -1,8 +1,7 @@
 import os
-import json
 import logging
-from typing import Dict, Any, List, Optional
-import httpx
+import ollama
+from typing import Dict, Any
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -10,264 +9,27 @@ logger = logging.getLogger(__name__)
 
 class OllamaService:
     """
-    Service for interacting with Ollama LLM to generate study plans
+    Service for interacting with the Ollama API
     """
     
     def __init__(self):
-        self.ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        self.host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         self.model = os.getenv("OLLAMA_MODEL", "llama3")
-        self.max_tokens = 4000
-        self.temperature = 0.7
-        self.use_ai = os.getenv("USE_AI_GENERATION", "true").lower() in ["true", "1", "yes"]
+        self.client = ollama.AsyncClient(host=self.host)
+        logger.info(f"Ollama service initialized with host: {self.host} and model: {self.model}")
         
-        if self.use_ai:
-            logger.info(f"Initialized Ollama service with host: {self.ollama_host}")
-            logger.info(f"Using AI model: {self.model}")
-        else:
-            logger.warning(f"AI DISABLED: Using PLACEHOLDER content generation instead of Ollama AI")
-    
-    async def generate_content(self, prompt: str) -> str:
+    async def generate_text(self, prompt: str, options: Dict[str, Any] = {}) -> Dict[str, Any]:
         """
-        Generate content using the Ollama API
-        
-        Args:
-            prompt: The prompt to send to the model
-            
-        Returns:
-            Generated text from the model
+        Generate text using the Ollama API
         """
         try:
-            logger.info(f"Generating content with Ollama model: {self.model}")
-            
-            # Ensure the API endpoint is correctly formatted
-            if not self.ollama_host.startswith("http"):
-                self.ollama_host = f"http://{self.ollama_host}"
-            
-            # Remove any trailing slashes
-            self.ollama_host = self.ollama_host.rstrip('/')
-            
-            url = f"{self.ollama_host}/api/generate"
-            
-            # Log model name and endpoint for debugging
-            logger.info(f"Using model name: {self.model}")
-            logger.info(f"Using API endpoint: {url}")
-            
-            payload = {
-                "model": self.model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": self.temperature,
-                    "num_predict": self.max_tokens
-                }
-            }
-            
-            # Reduced timeout from 120 to 30 seconds for faster feedback
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                logger.info(f"Sending request to Ollama API at {url}")
-                logger.info(f"Request payload: {json.dumps(payload)[:200]}...")
-                
-                # Attempt to connect to the Ollama API
-                try:
-                    response = await client.post(url, json=payload, timeout=30.0)
-                except httpx.TimeoutException:
-                    logger.error(f"Connection to Ollama API timed out after 30 seconds")
-                    return "Error: Connection to Ollama timed out"
-                
-                # Check response status code
-                if response.status_code != 200:
-                    logger.error(f"Error from Ollama API: {response.status_code} - {response.text}")
-                    return f"Error generating content: {response.status_code}"
-                
-                logger.info("Successfully received response from Ollama API")
-                
-                # Try to parse the JSON response
-                try:
-                    result = response.json()
-                    logger.info(f"Response type: {type(result)}")
-                    logger.info(f"Response keys: {result.keys() if isinstance(result, dict) else 'Not a dict'}")
-                    
-                    if 'response' in result:
-                        logger.info(f"Response length: {len(result.get('response', ''))}")
-                        return result.get("response", "")
-                    else:
-                        logger.error(f"Unexpected response format: {result}")
-                        return f"Error: Unexpected response format"
-                except Exception as e:
-                    logger.error(f"Error parsing response: {e}")
-                    return f"Error parsing response: {e}"
-                
+            logger.info("Generating text with Ollama")
+            response = await self.client.chat(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                format="json"
+            )
+            return response['message']['content']
         except Exception as e:
-            logger.error(f"Error generating content with Ollama: {str(e)}")
-            return f"Error: {str(e)}"
-    
-    async def create_study_plan(self, 
-                              topic: str, 
-                              research_data: Dict[str, Any],
-                              duration_weeks: int = 4,
-                              depth_level: int = 3,
-                              learning_style: Optional[str] = None,
-                              prior_knowledge: Optional[str] = None) -> Dict[str, Any]:
-        # Check if AI is disabled at the start
-        if not self.use_ai:
-            logger.warning(f"AI GENERATION DISABLED: Using placeholder content for topic {topic}")
-            return self._generate_fallback_plan(topic, duration_weeks, is_disabled=True)
-        """
-        Generate a complete study plan using Ollama
-        
-        Args:
-            topic: The main topic for the study plan
-            research_data: Research data collected about the topic
-            duration_weeks: Duration of the study plan in weeks
-            depth_level: Level of detail (1-5)
-            learning_style: Preferred learning style
-            prior_knowledge: Level of prior knowledge
-            
-        Returns:
-            Structured study plan
-        """
-        try:
-            # Extract key information from research data to include in prompt
-            sources_info = ""
-            for idx, source in enumerate(research_data.get('sources', [])[:5]):
-                sources_info += f"Source {idx+1}: {source.get('title', 'Unknown')} - {source.get('summary', '')[:300]}...\n\n"
-            
-            key_concepts = ", ".join(research_data.get('key_concepts', [])[:8])
-            related_topics = ", ".join(research_data.get('related_topics', []))
-            
-            # Build the prompt
-            prompt = f"""
-You are an expert educational consultant creating a comprehensive study plan for the topic: {topic}.
-
-RESEARCH DATA:
-{sources_info}
-
-KEY CONCEPTS: {key_concepts}
-
-RELATED TOPICS: {related_topics}
-
-PARAMETERS:
-- Duration: {duration_weeks} weeks
-- Depth Level: {depth_level}/5
-- Learning Style: {learning_style if learning_style else 'Not specified'}
-- Prior Knowledge: {prior_knowledge if prior_knowledge else 'Not specified'}
-
-Create a detailed, structured study plan following this exact JSON format:
-{{
-  "topic": "The main topic",
-  "summary": "A concise summary of what will be studied and why it's valuable",
-  "duration_weeks": {duration_weeks},
-  "learning_objectives": ["Objective 1", "Objective 2", "Objective 3", ...],
-  "key_concepts": ["Concept 1", "Concept 2", "Concept 3", ...],
-  "milestones": [
-    {{
-      "title": "Week 1: Foundation",
-      "description": "Description of what will be covered",
-      "week": 1,
-      "tasks": ["Task 1", "Task 2", "Task 3", ...],
-      "estimated_hours": 10
-    }},
-    ...more milestones for each week...
-  ],
-  "resources": [
-    {{
-      "title": "Resource Title",
-      "url": "https://example.com/resource",
-      "type": "article/book/video/course",
-      "description": "Brief description of the resource"
-    }},
-    ...more resources...
-  ],
-  "recommendations": "Additional personalized recommendations based on learning style"
-}}
-
-Return ONLY the valid JSON object, nothing else. Ensure all JSON is properly formatted and valid.
-"""
-            # Generate the study plan
-            result = await self.generate_content(prompt)
-            
-            # Parse the JSON response
-            try:
-                # Find JSON content (in case there's additional text)
-                json_start = result.find('{')
-                json_end = result.rfind('}') + 1
-                
-                if json_start >= 0 and json_end > json_start:
-                    json_content = result[json_start:json_end]
-                    study_plan = json.loads(json_content)
-                    logger.info(f"Successfully parsed AI-generated study plan for topic: {topic}")
-                    return study_plan
-                else:
-                    logger.error("Could not find valid JSON in Ollama response")
-                    return self._generate_fallback_plan(topic, duration_weeks)
-                    
-            except json.JSONDecodeError as e:
-                logger.error(f"Error parsing JSON from Ollama response: {str(e)}")
-                logger.error(f"Raw response: {result}")
-                return self._generate_fallback_plan(topic, duration_weeks)
-                
-        except Exception as e:
-            logger.error(f"Error creating study plan: {str(e)}")
-            return self._generate_fallback_plan(topic, duration_weeks)
-    
-    def _generate_fallback_plan(self, topic: str, duration_weeks: int, is_disabled: bool = False) -> Dict[str, Any]:
-        """
-        Generate a fallback study plan when AI generation fails
-        """
-        if is_disabled:
-            logger.warning(f"PLACEHOLDER MODE: AI generation disabled by configuration for topic: {topic}")
-        else:
-            logger.warning(f"FALLBACK MODE: AI generation failed, using template for topic: {topic}")
-        
-        # Create a basic template plan with clear indication it's a placeholder
-        placeholder_indicator = "[PLACEHOLDER CONTENT] " if is_disabled else "[FALLBACK TEMPLATE] "
-        
-        return {
-            "topic": topic,
-            "summary": f"{placeholder_indicator}A {duration_weeks}-week study plan for {topic}",
-            "duration_weeks": duration_weeks,
-            "learning_objectives": [
-                f"Understand core concepts of {topic}",
-                f"Develop practical skills in {topic}",
-                f"Apply knowledge of {topic} to real-world scenarios"
-            ],
-            "key_concepts": [f"{topic} fundamentals", f"{topic} applications", f"{topic} best practices"],
-            "milestones": [
-                {
-                    "title": "Week 1: Fundamentals",
-                    "description": f"Introduction to basic concepts of {topic}",
-                    "week": 1,
-                    "tasks": ["Research core concepts", "Study foundational principles", "Take beginner tutorial"],
-                    "estimated_hours": 10
-                },
-                {
-                    "title": f"Week {duration_weeks//2}: Intermediate Concepts",
-                    "description": f"Deepen understanding of {topic}",
-                    "week": duration_weeks//2,
-                    "tasks": ["Work on practical exercises", "Study intermediate materials", "Begin small project"],
-                    "estimated_hours": 12
-                },
-                {
-                    "title": f"Week {duration_weeks}: Advanced Applications",
-                    "description": f"Master advanced aspects of {topic}",
-                    "week": duration_weeks,
-                    "tasks": ["Complete project", "Review all materials", "Self-assessment"],
-                    "estimated_hours": 15
-                }
-            ],
-            "resources": [
-                {
-                    "title": f"{topic} - Official Documentation",
-                    "url": "",
-                    "type": "documentation",
-                    "description": "Official documentation and guides"
-                },
-                {
-                    "title": f"Introduction to {topic}",
-                    "url": "",
-                    "type": "course",
-                    "description": "Beginner-friendly course"
-                }
-            ],
-            "recommendations": f"Focus on hands-on practice while studying {topic}. Consider joining relevant communities for support."
-        }
+            logger.error(f"Error generating text with Ollama: {str(e)}")
+            raise

@@ -52,6 +52,15 @@
                         </a>
                     </nav>
                 </div>
+                <div class="flex items-center">
+                    <label for="language" class="sr-only">Language</label>
+                    <select id="language" name="language" class="text-sm rounded-md border-gray-300">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                    </select>
+                </div>
             </div>
         </div>
     </header>
@@ -190,6 +199,11 @@
                 </div>
 
                 <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Prerequisites</h3>
+                    <ul id="prerequisites" class="list-disc pl-5 text-gray-700 space-y-1"></ul>
+                </div>
+
+                <div class="mb-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-2">Learning Objectives</h3>
                     <ul id="learningObjectives" class="list-disc pl-5 text-gray-700 space-y-1"></ul>
                 </div>
@@ -212,6 +226,11 @@
                 <div id="recommendationsSection" class="mb-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-2">Additional Recommendations</h3>
                     <p id="recommendations" class="text-gray-700"></p>
+                </div>
+
+                <div id="quizSection" class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Knowledge Check</h3>
+                    <div id="quiz" class="space-y-4"></div>
                 </div>
 
                 <div class="mt-6">

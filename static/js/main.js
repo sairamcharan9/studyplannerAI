@@ -129,6 +129,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set summary
         document.getElementById('planSummary').textContent = data.summary;
         
+        // Set prerequisites
+        const prerequisitesList = document.getElementById('prerequisites');
+        prerequisitesList.innerHTML = '';
+        if (data.prerequisites && data.prerequisites.length > 0) {
+            data.prerequisites.forEach(prereq => {
+                const li = document.createElement('li');
+                li.textContent = prereq;
+                prerequisitesList.appendChild(li);
+            });
+        }
+
         // Set learning objectives
         const objectivesList = document.getElementById('learningObjectives');
         objectivesList.innerHTML = '';
@@ -265,6 +276,43 @@ document.addEventListener('DOMContentLoaded', function() {
             recommendationsContent.textContent = data.recommendations;
         } else {
             recommendationsSection.classList.add('hidden');
+        }
+
+        // Set quiz
+        const quizSection = document.getElementById('quizSection');
+        const quizContainer = document.getElementById('quiz');
+        quizContainer.innerHTML = '';
+
+        if (data.quiz && data.quiz.length > 0) {
+            quizSection.classList.remove('hidden');
+            data.quiz.forEach((q, index) => {
+                const quizItem = document.createElement('div');
+                quizItem.className = 'bg-gray-50 p-4 rounded-md';
+
+                const question = document.createElement('p');
+                question.className = 'font-semibold';
+                question.textContent = `${index + 1}. ${q.question}`;
+                quizItem.appendChild(question);
+
+                const options = document.createElement('div');
+                options.className = 'mt-2 space-y-1';
+                q.options.forEach(opt => {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center';
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `question-${index}`;
+                    input.value = opt;
+                    input.className = 'mr-2';
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(opt));
+                    options.appendChild(label);
+                });
+                quizItem.appendChild(options);
+                quizContainer.appendChild(quizItem);
+            });
+        } else {
+            quizSection.classList.add('hidden');
         }
     }
 });
