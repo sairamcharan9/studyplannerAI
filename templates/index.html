@@ -67,10 +67,13 @@
                     <form id="studyPlanForm" class="space-y-6">
                         <div>
                             <label for="topic" class="block text-sm font-medium text-gray-700">Topic *</label>
-                            <div class="mt-1">
+                            <div class="mt-1 relative">
                                 <input type="text" name="topic" id="topic" required
                                     class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                    placeholder="e.g., Machine Learning, Web Development, Python Programming">
+                                    placeholder="e.g., Machine Learning, Web Development, Python Programming"
+                                    autocomplete="off">
+                                <div id="suggestions-container" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 hidden shadow-lg">
+                                </div>
                             </div>
                             <p class="mt-1 text-xs text-gray-500">Enter the main topic you want to study</p>
                         </div>
@@ -154,6 +157,17 @@
                             <div class="ml-3 text-sm">
                                 <label for="include_resources" class="font-medium text-gray-700">Include Learning Resources</label>
                                 <p class="text-gray-500">Provide recommended books, courses, videos, etc.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="generate_goals" name="generate_goals" type="checkbox"
+                                    class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="generate_goals" class="font-medium text-gray-700">Generate Smart Goals</label>
+                                <p class="text-gray-500">Let AI suggest learning goals for you.</p>
                             </div>
                         </div>
 
