@@ -18,6 +18,7 @@ class StudyPlanRequest(BaseModel):
     learning_style: Optional[str] = None  # visual, auditory, reading/writing, kinesthetic
     prior_knowledge: Optional[str] = None  # none, beginner, intermediate, advanced
     goals: Optional[List[str]] = None
+    generate_goals: bool = False
     additional_context: Optional[str] = None
 
 class ResourceItem(BaseModel):
@@ -78,6 +79,7 @@ async def generate_study_plan(
             learning_style=request.learning_style,
             prior_knowledge=request.prior_knowledge,
             goals=request.goals,
+            generate_goals=request.generate_goals,
             additional_context=request.additional_context
         )
         
@@ -97,3 +99,22 @@ async def get_trending_topics(
         return trending_topics
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get trending topics: {str(e)}")
+
+@router.get("/suggestions", response_model=List[str])
+async def get_suggestions(query: str = Query(..., min_length=3)):
+    """
+    Provide suggestions for study topics based on the user's query.
+    """
+    # In a real application, this could be a more sophisticated suggestion engine
+    # (e.g., using a database, search index, or another AI model).
+    predefined_suggestions = [
+        "Machine Learning", "Web Development", "Python Programming", "Data Science",
+        "Artificial Intelligence", "Cybersecurity", "Cloud Computing", "DevOps",
+        "JavaScript", "React", "Node.js", "SQL", "NoSQL", "Blockchain",
+        "Mobile App Development", "Game Development", "UI/UX Design"
+    ]
+
+    # Filter suggestions based on the query
+    matching_suggestions = [s for s in predefined_suggestions if query.lower() in s.lower()]
+
+    return matching_suggestions[:5]  # Return top 5 matches
