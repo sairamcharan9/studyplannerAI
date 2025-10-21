@@ -17,7 +17,7 @@ logger = logging.getLogger("test_openrouter")
 # Import services
 from app.services.research_service import ResearchService
 from app.services.study_plan_service import StudyPlanService
-from app.services.openrouter_service import OpenRouterService
+from app.services.ai_service_factory import get_ai_service
 
 async def test_openrouter_generation():
     """Test study plan generation using OpenRouter/Gemini"""
@@ -46,6 +46,7 @@ async def test_openrouter_generation():
     # Create services
     research_service = ResearchService()
     study_plan_service = StudyPlanService()
+    ai_service = get_ai_service()
     
     # Topic to test with
     test_topic = "Machine Learning for Beginners"
@@ -58,6 +59,7 @@ async def test_openrouter_generation():
         # Generate study plan
         logger.info(f"Generating study plan with OpenRouter (Gemini) for topic: {test_topic}")
         study_plan = await study_plan_service.generate_plan(
+            ai_service=ai_service,
             topic=test_topic,
             research_data=research_data,
             depth_level=3,

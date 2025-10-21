@@ -17,7 +17,7 @@ logger = logging.getLogger("test_generation")
 # Import services
 from app.services.research_service import ResearchService
 from app.services.study_plan_service import StudyPlanService
-from app.services.ollama_service import OllamaService
+from app.services.ai_service_factory import get_ai_service
 
 async def test_study_plan_generation():
     """Test study plan generation with current settings"""
@@ -26,16 +26,17 @@ async def test_study_plan_generation():
     
     # Log current settings
     use_ai = os.getenv("USE_AI_GENERATION", "true").lower() in ["true", "1", "yes"]
-    ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
+    ai_provider = os.getenv("AI_PROVIDER", "ollama")
     
     logger.info("====== StudyplannerAI Test ======")
     logger.info(f"USE_AI_GENERATION = {os.getenv('USE_AI_GENERATION', 'true')}")
-    logger.info(f"OLLAMA_MODEL = {ollama_model}")
+    logger.info(f"AI_PROVIDER = {ai_provider}")
     logger.info(f"Will use AI? {use_ai}")
     
     # Create services
     research_service = ResearchService()
     study_plan_service = StudyPlanService()
+    ai_service = get_ai_service()
     
     # Topic to test with
     test_topic = "Python Programming"
@@ -48,6 +49,7 @@ async def test_study_plan_generation():
         # Generate study plan
         logger.info(f"Generating study plan for topic: {test_topic}")
         study_plan = await study_plan_service.generate_plan(
+            ai_service=ai_service,
             topic=test_topic,
             research_data=research_data,
             depth_level=3,

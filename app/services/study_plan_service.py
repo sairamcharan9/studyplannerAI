@@ -2,8 +2,6 @@ import os
 import logging
 from typing import Dict, Any, List, Optional
 from .research_service import ResearchService
-from .ollama_service import OllamaService
-from .openrouter_service import OpenRouterService
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -16,14 +14,10 @@ class StudyPlanService:
     
     def __init__(self):
         self.research_service = ResearchService()
-        self.ollama_service = OllamaService()
-        self.openrouter_service = OpenRouterService()
-        
-        # Determine which AI provider to use based on configuration
-        self.ai_provider = os.getenv("AI_PROVIDER", "ollama").lower()
-        logger.info(f"Study plan service initialized with AI provider: {self.ai_provider}")
+        logger.info("Study plan service initialized")
     
     async def generate_plan(self,
+                          ai_service: Any,
                           topic: str,
                           research_data: Dict[str, Any],
                           depth_level: int = 3,
@@ -38,6 +32,7 @@ class StudyPlanService:
         Generate a comprehensive study plan
         
         Args:
+            ai_service: The AI service instance to use for generation.
             topic: The main topic to create a study plan for
             research_data: Data collected from research
             depth_level: Level of detail (1-5)
@@ -59,32 +54,18 @@ class StudyPlanService:
             use_ai = os.getenv("USE_AI_GENERATION", "true").lower() in ["true", "1", "yes"]
             
             if use_ai:
-                if self.ai_provider == "openrouter":
-                    # Generate the study plan using OpenRouter (Gemini)
-                    logger.info(f"Attempting to generate study plan using OpenRouter model: {self.openrouter_service.model}")
-                    study_plan = await self.openrouter_service.create_study_plan(
-                        topic=topic,
-                        research_data=research_data,
-                        duration_weeks=duration_weeks,
-                        depth_level=depth_level,
-                        learning_style=learning_style,
-                        prior_knowledge=prior_knowledge
-                    )
-                    generation_method = "OPENROUTER-GEMINI"
-                else:
-                    # Generate the study plan using Ollama
-                    logger.info(f"Attempting to generate study plan using Ollama model: {self.ollama_service.model}")
-                    study_plan = await self.ollama_service.create_study_plan(
-                        topic=topic,
-                        research_data=research_data,
-                        duration_weeks=duration_weeks,
-                        depth_level=depth_level,
-                        learning_style=learning_style,
-                        prior_knowledge=prior_knowledge
-                    )
-                    generation_method = "OLLAMA"
+                logger.info(f"Attempting to generate study plan using AI service: {ai_service.__class__.__name__}")
+                study_plan = await ai_service.create_study_plan(
+                    topic=topic,
+                    research_data=research_data,
+                    duration_weeks=duration_weeks,
+                    depth_level=depth_level,
+                    learning_style=learning_style,
+                    prior_knowledge=prior_knowledge
+                )
+                generation_method = ai_service.__class__.__name__
             else:
-                # Skip Ollama and use placeholders directly
+                # Skip AI and use placeholders directly
                 logger.warning(f"AI generation disabled by environment setting. Using PLACEHOLDER generation.")
                 study_plan = self._create_fallback_plan(topic, duration_weeks)
                 generation_method = "PLACEHOLDER"
@@ -103,6 +84,7 @@ class StudyPlanService:
             if generate_goals:
                 logger.info("Generating smart goals...")
                 generated_goals = await self.generate_learning_goals(
+                    ai_service=ai_service,
                     topic=topic,
                     duration_weeks=duration_weeks,
                     prior_knowledge=prior_knowledge
@@ -125,20 +107,11 @@ class StudyPlanService:
                 study_plan.pop("resources")
             
             # Report the correct AI provider that was used
-            if self.ai_provider == "openrouter":
-                if is_fallback or generation_method == "PLACEHOLDER":
-                    logger.info(f"Successfully generated study plan using PLACEHOLDER templates")
-                else:
-                    model_name = self.openrouter_service.model
-                    logger.info(f"Successfully generated study plan using OpenRouter with model: {model_name}")
-            elif self.ai_provider == "ollama":
-                if is_fallback or generation_method == "PLACEHOLDER":
-                    logger.info(f"Successfully generated study plan using PLACEHOLDER templates")
-                else:
-                    model_name = self.ollama_service.model
-                    logger.info(f"Successfully generated study plan using Ollama with model: {model_name}")
-            else:
+            if is_fallback or generation_method == "PLACEHOLDER":
                 logger.info(f"Successfully generated study plan using PLACEHOLDER templates")
+            else:
+                model_name = getattr(ai_service, 'model', 'unknown')
+                logger.info(f"Successfully generated study plan using {generation_method} with model: {model_name}")
                 
             return study_plan
             
@@ -148,23 +121,16 @@ class StudyPlanService:
             logger.warning(f"Falling back to template-based study plan generation for topic: {topic}")
             return self._create_fallback_plan(topic, duration_weeks)
 
-    async def generate_learning_goals(self, topic: str, duration_weeks: int, prior_knowledge: Optional[str]) -> List[str]:
+    async def generate_learning_goals(self, ai_service: Any, topic: str, duration_weeks: int, prior_knowledge: Optional[str]) -> List[str]:
         """
         Generate learning goals using the selected AI provider.
         """
         try:
-            if self.ai_provider == "openrouter":
-                return await self.openrouter_service.generate_learning_goals(
-                    topic=topic,
-                    duration_weeks=duration_weeks,
-                    prior_knowledge=prior_knowledge
-                )
-            else:
-                return await self.ollama_service.generate_learning_goals(
-                    topic=topic,
-                    duration_weeks=duration_weeks,
-                    prior_knowledge=prior_knowledge
-                )
+            return await ai_service.generate_learning_goals(
+                topic=topic,
+                duration_weeks=duration_weeks,
+                prior_knowledge=prior_knowledge
+            )
         except Exception as e:
             logger.error(f"Failed to generate learning goals: {e}")
             return [
