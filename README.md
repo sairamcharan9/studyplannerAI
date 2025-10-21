@@ -71,18 +71,52 @@ The application uses a modular architecture:
 - **FastAPI Backend**: RESTful API endpoints for generating study plans
 - **Research Service**: Scrapes and analyzes web content to gather relevant information
 - **Ollama Service**: Communicates with the Ollama API to generate structured study plans
+- **OpenRouter Service**: Communicates with the OpenRouter API to generate structured study plans
+- **Gemini Service**: Communicates with the Google Gemini API to generate structured study plans
 - **Study Plan Service**: Coordinates between research and AI generation
 - **Jinja2 Templates**: Server-side rendering for the web interface
 - **Tailwind CSS**: Utility-first CSS framework for styling
 
 ## API Integration
 
-The application currently uses Ollama for local AI model integration. Future versions plan to include:
+The application supports multiple AI providers. You can choose which provider to use by setting the `AI_PROVIDER` environment variable.
 
-1. Integration with additional AI APIs (OpenAI, Google Gemini, etc.)
-2. Enhanced web research capabilities
-3. PDF export functionality
-4. User accounts and saved study plans
+- `ollama`: (Default) Uses a local Ollama instance.
+- `openrouter`: Uses the OpenRouter API. Requires an `OPENROUTER_API_KEY`.
+- `gemini`: Uses the Google Gemini API. Requires a `GEMINI_API_KEY`.
+
+### Ollama
+
+To use Ollama, set the following environment variables:
+
+```
+# .env
+AI_PROVIDER=ollama
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=llama3
+```
+
+### OpenRouter
+
+To use OpenRouter, set the following environment variables:
+
+```
+# .env
+AI_PROVIDER=openrouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_MODEL=google/gemini-2.0-flash-exp:free
+```
+
+### Google Gemini
+
+To use Google Gemini, set the following environment variables:
+
+```
+# .env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-1.5-flash
+```
 
 ## Customizing the Application
 
