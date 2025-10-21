@@ -187,7 +187,8 @@ class OpenRouterService:
                               duration_weeks: int = 4,
                               depth_level: int = 3,
                               learning_style: Optional[str] = None,
-                              prior_knowledge: Optional[str] = None) -> Dict[str, Any]:
+                              prior_knowledge: Optional[str] = None,
+                              generate_goals: bool = False) -> Dict[str, Any]:
         """
         Generate a complete study plan using OpenRouter
         

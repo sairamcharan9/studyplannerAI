@@ -61,7 +61,8 @@ class StudyPlanService:
                     duration_weeks=duration_weeks,
                     depth_level=depth_level,
                     learning_style=learning_style,
-                    prior_knowledge=prior_knowledge
+                    prior_knowledge=prior_knowledge,
+                    generate_goals=generate_goals
                 )
                 generation_method = ai_service.__class__.__name__
             else:

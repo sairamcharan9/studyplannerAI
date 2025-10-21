@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 # Import our app modules
 from app.api.router import router as api_router
+from app.api.settings_router import router as settings_router
 
 # Load environment variables
 load_dotenv()
@@ -73,6 +74,7 @@ templates = Jinja2Templates(directory="templates")
 
 # Include API routes
 app.include_router(api_router, prefix="/api")
+app.include_router(settings_router)
 
 # Root route
 @app.get("/")
@@ -89,4 +91,4 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
