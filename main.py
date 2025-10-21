@@ -42,6 +42,9 @@ if os.getenv('AI_PROVIDER', '').lower() == 'openrouter':
 elif os.getenv('AI_PROVIDER', '').lower() == 'ollama':
     logger.info(f"Ollama model: {os.getenv('OLLAMA_MODEL', 'Not set')}")
     logger.info(f"Ollama host: {os.getenv('OLLAMA_HOST', 'Not set')}")
+elif os.getenv('AI_PROVIDER', '').lower() == 'gemini':
+    logger.info(f"Gemini model: {os.getenv('GEMINI_MODEL', 'Not set')}")
+    logger.info(f"Gemini API key: {os.getenv('GEMINI_API_KEY', 'Not set')}")
 else:
     logger.info("Using placeholder generation (no AI)")
 
