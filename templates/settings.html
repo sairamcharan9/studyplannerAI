@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - StudyplannerAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/custom.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-graduation-cap text-primary-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">StudyplannerAI</span>
+                    </div>
+                    <nav class="hidden md:ml-6 md:flex md:space-x-8">
+                        <a href="/" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Home
+                        </a>
+                        <a href="/settings" class="border-primary-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Settings
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-5 sm:p-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
+                <p class="text-gray-600 mb-4">Manage your application settings and API keys.</p>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Security Warning:</strong> Storing API keys in a `.env` file is suitable for local development but is not recommended for production environments. For production, use a secure secret management solution provided by your hosting provider.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="success-message" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Success!</strong>
+                    <span class="block sm:inline">Your settings have been saved.</span>
+                </div>
+
+                <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline">Could not save settings. Please try again.</span>
+                </div>
+
+                <form id="settingsForm" class="space-y-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">AI Provider</h2>
+                        <label for="ai_provider" class="block text-sm font-medium text-gray-700">AI Provider</label>
+                        <select id="ai_provider" name="AI_PROVIDER" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                            <option value="ollama">Ollama</option>
+                            <option value="openrouter">OpenRouter</option>
+                            <option value="gemini">Gemini</option>
+                        </select>
+                    </div>
+
+                    <div id="ollama-settings">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Ollama Settings</h2>
+                        <div>
+                            <label for="ollama_host" class="block text-sm font-medium text-gray-700">Ollama Host</label>
+                            <input type="text" name="OLLAMA_HOST" id="ollama_host" class="mt-1 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="http://localhost:11434">
+                        </div>
+                        <div class="mt-4">
+                            <label for="ollama_model" class="block text-sm font-medium text-gray-700">Ollama Model</label>
+                            <input type="text" name="OLLAMA_MODEL" id="ollama_model" class="mt-1 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="llama3">
+                        </div>
+                    </div>
+
+                    <div id="openrouter-settings">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">OpenRouter Settings</h2>
+                        <div>
+                            <label for="openrouter_api_key" class="block text-sm font-medium text-gray-700">OpenRouter API Key</label>
+                            <input type="password" name="OPENROUTER_API_KEY" id="openrouter_api_key" class="mt-1 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="********">
+                        </div>
+                        <div class="mt-4">
+                            <label for="openrouter_model" class="block text-sm font-medium text-gray-700">OpenRouter Model</label>
+                            <input type="text" name="OPENROUTER_MODEL" id="openrouter_model" class="mt-1 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="google/gemini-2.0-flash-exp:free">
+                        </div>
+                    </div>
+
+                    <div id="gemini-settings">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Gemini Settings</h2>
+                        <div>
+                            <label for="gemini_api_key" class="block text-sm font-medium text-gray-700">Gemini API Key</label>
+                            <input type="password" name="GEMINI_API_KEY" id="gemini_api_key" class="mt-1 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="********">
+                        </div>
+                        <div class="mt-4">
+                            <label for="gemini_model" class="block text-sm font-medium text-gray-700">Gemini Model</label>
+                            <input type="text" name="GEMINI_MODEL" id="gemini_model" class="mt-1 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="gemini-1.5-flash">
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500 text-sm">
+                &copy; 2025 StudyplannerAI. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='/js/settings.js') }}"></script>
+</body>
+</html>
