@@ -60,131 +60,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <!-- Hero Section -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-            <div class="px-4 py-5 sm:p-6">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Generate AI-Powered Study Plans</h1>
-                <p class="text-gray-600 mb-4">Create a personalized learning roadmap based on research and your specific needs</p>
-                
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <form id="studyPlanForm" class="space-y-6">
-                        <div>
-                            <label for="topic" class="block text-sm font-medium text-gray-700">Topic *</label>
-                            <div class="mt-1 relative">
-                                <input type="text" name="topic" id="topic" required
-                                    class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                    placeholder="e.g., Machine Learning, Web Development, Python Programming"
-                                    autocomplete="off">
-                                <div id="suggestions-container" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 hidden shadow-lg">
-                                </div>
-                            </div>
-                            <p class="mt-1 text-xs text-gray-500">Enter the main topic you want to study</p>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="duration" class="block text-sm font-medium text-gray-700">Duration (weeks)</label>
-                                <select id="duration" name="duration_weeks" 
-                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                                    <option value="1">1 week</option>
-                                    <option value="2">2 weeks</option>
-                                    <option value="4" selected>4 weeks</option>
-                                    <option value="8">8 weeks</option>
-                                    <option value="12">12 weeks</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="depth" class="block text-sm font-medium text-gray-700">Level of Detail</label>
-                                <select id="depth" name="depth_level" 
-                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                                    <option value="1">Basic (1)</option>
-                                    <option value="2">Introductory (2)</option>
-                                    <option value="3" selected>Standard (3)</option>
-                                    <option value="4">Detailed (4)</option>
-                                    <option value="5">Comprehensive (5)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="learning_style" class="block text-sm font-medium text-gray-700">Learning Style</label>
-                                <select id="learning_style" name="learning_style" 
-                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                                    <option value="">Not specified</option>
-                                    <option value="visual">Visual</option>
-                                    <option value="auditory">Auditory</option>
-                                    <option value="reading_writing">Reading/Writing</option>
-                                    <option value="kinesthetic">Kinesthetic (Hands-on)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="prior_knowledge" class="block text-sm font-medium text-gray-700">Prior Knowledge</label>
-                                <select id="prior_knowledge" name="prior_knowledge" 
-                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                                    <option value="">Not specified</option>
-                                    <option value="none">None</option>
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="advanced">Advanced</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="goals" class="block text-sm font-medium text-gray-700">Learning Goals</label>
-                            <div class="mt-1">
-                                <textarea id="goals" name="goals" rows="3"
-                                    class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                    placeholder="Optional: Enter specific learning goals separated by commas"></textarea>
-                            </div>
-                            <p class="mt-1 text-xs text-gray-500">What do you want to achieve by studying this topic?</p>
-                        </div>
-
-                        <div>
-                            <label for="additional_context" class="block text-sm font-medium text-gray-700">Additional Context</label>
-                            <div class="mt-1">
-                                <textarea id="additional_context" name="additional_context" rows="3"
-                                    class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                    placeholder="Optional: Any additional information or requirements"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                                <input id="include_resources" name="include_resources" type="checkbox" checked
-                                    class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
-                            </div>
-                            <div class="ml-3 text-sm">
-                                <label for="include_resources" class="font-medium text-gray-700">Include Learning Resources</label>
-                                <p class="text-gray-500">Provide recommended books, courses, videos, etc.</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                                <input id="generate_goals" name="generate_goals" type="checkbox"
-                                    class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
-                            </div>
-                            <div class="ml-3 text-sm">
-                                <label for="generate_goals" class="font-medium text-gray-700">Generate Smart Goals</label>
-                                <p class="text-gray-500">Let AI suggest learning goals for you.</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button type="submit" 
-                                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                                Generate Study Plan
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
         <!-- Loading Indicator -->
         <div id="loadingIndicator" class="hidden bg-white p-8 rounded-lg shadow-md text-center">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mb-4"></div>
@@ -331,6 +206,28 @@
             </p>
         </div>
     </footer>
+
+    <!-- Chatbox Widget -->
+    <div id="chat-widget-container">
+        <div id="chat-bubble">
+            <i class="fas fa-comment-dots"></i>
+        </div>
+        <div id="chat-window">
+            <div id="chat-header">
+                <span>Study Planner Assistant</span>
+                <button id="close-chat">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="chat-messages"></div>
+            <div id="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Tell me what you want to learn...">
+                <button id="send-chat-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="{{ url_for('static', path='/js/main.js') }}"></script>
 </body>
