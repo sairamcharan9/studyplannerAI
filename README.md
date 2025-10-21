@@ -9,6 +9,7 @@ An AI-powered study plan generator that creates personalized learning roadmaps b
 - **Customizable Options**: Adjust duration, detail level, learning style, and prior knowledge
 - **Resource Recommendations**: Suggests books, courses, videos, and other learning materials
 - **Modern Web Interface**: Clean, responsive UI built with FastAPI and Tailwind CSS
+- **Facial Expression Analysis**: (New!) Analyzes student facial expressions during study sessions to provide insights into engagement and focus.
 
 ## Setup Instructions
 
@@ -16,6 +17,7 @@ An AI-powered study plan generator that creates personalized learning roadmaps b
 
 - Python 3.8+ installed
 - [Ollama](https://ollama.ai) installed and running locally (default: http://localhost:11434)
+- `opencv-python` and `numpy` for facial analysis (installed via `requirements.txt`)
 
 ### Installation
 
@@ -52,6 +54,17 @@ An AI-powered study plan generator that creates personalized learning roadmaps b
    OLLAMA_MODEL=llama3
    ```
 
+### Facial Expression Analysis Setup
+
+To enable the facial expression analysis feature:
+
+1.  **Enable in Settings:** Navigate to the `/settings` page in the application and toggle "Enable Facial Expression Analysis" to `true`.
+2.  **Environment Variable:** Ensure the following is set in your `.env` file:
+    ```
+    ENABLE_FACIAL_ANALYSIS=true
+    ```
+3.  **Privacy Policy:** Review the [Privacy Policy](PRIVACY_POLICY.md) regarding facial data collection and usage. Explicit user consent is required before camera access is initiated.
+
 ### Running the Application
 
 1. Start the application:
@@ -68,11 +81,12 @@ An AI-powered study plan generator that creates personalized learning roadmaps b
 
 The application uses a modular architecture:
 
-- **FastAPI Backend**: RESTful API endpoints for generating study plans
+- **FastAPI Backend**: RESTful API endpoints for generating study plans, including facial analysis.
 - **Research Service**: Scrapes and analyzes web content to gather relevant information
 - **Ollama Service**: Communicates with the Ollama API to generate structured study plans
 - **OpenRouter Service**: Communicates with the OpenRouter API to generate structured study plans
 - **Gemini Service**: Communicates with the Google Gemini API to generate structured study plans
+- **Facial Analysis Data Service**: (New!) Handles storage of facial expression analysis logs.
 - **Study Plan Service**: Coordinates between research and AI generation
 - **Jinja2 Templates**: Server-side rendering for the web interface
 - **Tailwind CSS**: Utility-first CSS framework for styling
