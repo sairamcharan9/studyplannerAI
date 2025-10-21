@@ -107,7 +107,8 @@ class OllamaService:
                               duration_weeks: int = 4,
                               depth_level: int = 3,
                               learning_style: Optional[str] = None,
-                              prior_knowledge: Optional[str] = None) -> Dict[str, Any]:
+                              prior_knowledge: Optional[str] = None,
+                              generate_goals: bool = False) -> Dict[str, Any]:
         # Check if AI is disabled at the start
         if not self.use_ai:
             logger.warning(f"AI GENERATION DISABLED: Using placeholder content for topic {topic}")

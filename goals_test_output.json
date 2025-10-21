@@ -1,0 +1,65 @@
+{
+  "topic": "Creative Writing",
+  "summary": "[FALLBACK TEMPLATE] A 4-week study plan for Creative Writing",
+  "duration_weeks": 4,
+  "learning_objectives": [
+    "Develop practical skills in Creative Writing",
+    "Understand core concepts of Creative Writing",
+    "Apply knowledge of Creative Writing to real-world scenarios"
+  ],
+  "key_concepts": [
+    "Creative Writing fundamentals",
+    "Creative Writing applications",
+    "Creative Writing best practices"
+  ],
+  "milestones": [
+    {
+      "title": "Week 1: Fundamentals",
+      "description": "Introduction to basic concepts of Creative Writing",
+      "week": 1,
+      "tasks": [
+        "Research core concepts",
+        "Study foundational principles",
+        "Take beginner tutorial"
+      ],
+      "estimated_hours": 10
+    },
+    {
+      "title": "Week 2: Intermediate Concepts",
+      "description": "Deepen understanding of Creative Writing",
+      "week": 2,
+      "tasks": [
+        "Work on practical exercises",
+        "Study intermediate materials",
+        "Begin small project"
+      ],
+      "estimated_hours": 12
+    },
+    {
+      "title": "Week 4: Advanced Applications",
+      "description": "Master advanced aspects of Creative Writing",
+      "week": 4,
+      "tasks": [
+        "Complete project",
+        "Review all materials",
+        "Self-assessment"
+      ],
+      "estimated_hours": 15
+    }
+  ],
+  "resources": [
+    {
+      "title": "Creative Writing - Official Documentation",
+      "url": "",
+      "type": "documentation",
+      "description": "Official documentation and guides"
+    },
+    {
+      "title": "Introduction to Creative Writing",
+      "url": "",
+      "type": "course",
+      "description": "Beginner-friendly course"
+    }
+  ],
+  "recommendations": "Focus on hands-on practice while studying Creative Writing. Consider joining relevant communities for support."
+}
