@@ -81,6 +81,14 @@ async def root(request: Request):
         {"request": request, "title": "StudyplannerAI - Generate Research-Based Study Plans"}
     )
 
+# Login route
+@app.get("/login")
+async def login(request: Request):
+    return templates.TemplateResponse(
+        "login.html", 
+        {"request": request, "title": "Login - StudyplannerAI"}
+    )
+
 # Health check
 @app.get("/health")
 async def health_check():
