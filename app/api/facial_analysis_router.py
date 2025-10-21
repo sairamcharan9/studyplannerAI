@@ -1,18 +1,28 @@
-from flask import Blueprint, request, jsonify, current_app
+from fastapi import APIRouter, Request, HTTPException
+from fastapi.responses import JSONResponse
 import base64
 import cv2
 import numpy as np
+import logging
 
-facial_analysis_bp = Blueprint('facial_analysis', __name__)
+# Set up logger for this module
+logger = logging.getLogger(__name__)
 
-@facial_analysis_bp.route('/api/analyze-expression', methods=['POST'])
-def analyze_expression():
+facial_analysis_router = APIRouter()
+
+@facial_analysis_router.post('/analyze-expression')
+async def analyze_expression(request: Request):
     """
     Receives an image, performs facial expression analysis, and returns results.
     """
-    data = request.get_json()
+    try:
+        data = await request.json()
+    except Exception as e:
+        logger.error(f"Error parsing request JSON: {e}")
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
     if not data or 'image' not in data:
-        return jsonify({'error': 'No image data provided'}), 400
+        raise HTTPException(status_code=400, detail="No image data provided")
 
     image_data = data['image']
     # Remove the "data:image/jpeg;base64," prefix if present
@@ -25,44 +35,20 @@ def analyze_expression():
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         if img is None:
-            return jsonify({'error': 'Could not decode image'}), 400
+            raise HTTPException(status_code=400, detail="Could not decode image")
 
         # Placeholder for facial analysis logic
         # In a real implementation, you would use a pre-trained model (e.g., OpenCV, Dlib, or an external API)
         # to detect faces and analyze expressions.
-        # For now, we'll return a dummy response.
-
-        # Example: Simple face detection (requires OpenCV haarcascades)
-        # This part assumes you have OpenCV installed and the haarcascade file available.
-        # For simplicity, I'll keep it as a placeholder for now.
-        # face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # faces = face_cascade.detectMultiScale(gray, 1.1, 4)
-
-        # if len(faces) > 0:
-        #     # Dummy expression for now
-        #     expression = "Neutral"
-        #     confidence = 0.85
-        #     return jsonify({'expression': expression, 'confidence': confidence, 'message': 'Facial analysis performed.'}), 200
-        # else:
-        #     return jsonify({'message': 'No face detected.'}), 200
-        
-        # Simulating a basic response without actual face detection for initial setup
-        # This will be replaced with actual ML integration later.
-        
-        # Dummy logic: Assume a face is always detected and return a 'Focused' expression
-        # This should be replaced with actual ML model inference
-        
-        # To simulate different expressions, we could add some random choice,
-        # but for initial setup, a consistent response is fine.
         
         expressions = ["Focused", "Neutral", "Engaged", "Thinking"]
         expression = np.random.choice(expressions)
         confidence = np.random.uniform(0.7, 0.95)
 
-        return jsonify({'expression': expression, 'confidence': confidence, 'message': 'Facial analysis performed.'}), 200
+        return JSONResponse(content={'expression': expression, 'confidence': confidence, 'message': 'Facial analysis performed.'}, status_code=200)
 
-
+    except HTTPException:
+        raise # Re-raise HTTPExceptions
     except Exception as e:
-        current_app.logger.error(f"Error during facial analysis: {e}")
-        return jsonify({'error': 'Internal server error during analysis', 'details': str(e)}), 500
+        logger.error(f"Error during facial analysis: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error during analysis: {e}")
