@@ -2,6 +2,7 @@ import os
 import logging
 from app.services.ollama_service import OllamaService
 from app.services.openrouter_service import OpenRouterService
+from app.services.gemini_service import GeminiService
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,9 @@ def get_ai_service():
     if ai_provider == "openrouter":
         logger.info("Returning OpenRouterService")
         return OpenRouterService()
+    elif ai_provider == "gemini":
+        logger.info("Returning GeminiService")
+        return GeminiService()
     elif ai_provider == "ollama":
         logger.info("Returning OllamaService")
         return OllamaService()
