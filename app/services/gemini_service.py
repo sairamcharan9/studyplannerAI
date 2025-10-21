@@ -126,7 +126,6 @@ Return ONLY the valid JSON object, nothing else. Ensure all JSON is properly for
 """
             # Generate the study plan
             result = await self.generate_content(prompt)
-
             # Parse the JSON response
             try:
                 # Find JSON content (in case there's additional text)
