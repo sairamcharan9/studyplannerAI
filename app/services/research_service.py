@@ -4,6 +4,7 @@ import asyncio
 from typing import List, Dict, Any, Optional
 from bs4 import BeautifulSoup
 import logging
+from urllib.parse import urlparse, parse_qs
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -89,7 +90,8 @@ class ResearchService:
                 response = await client.post(
                     self.search_url,
                     data=search_params,
-                    headers={'User-Agent': self.user_agent}
+                    headers={'User-Agent': self.user_agent},
+                    follow_redirects=True # Added this line
                 )
                 
                 if response.status_code != 200:
@@ -117,7 +119,6 @@ class ResearchService:
                         # Some DDG results have redirect URLs, extract the actual URL
                         if 'duckduckgo.com/l/?' in url_href:
                             # Extract the actual URL from redirect parameter
-                            from urllib.parse import urlparse, parse_qs
                             parsed_url = urlparse(url_href)
                             url_params = parse_qs(parsed_url.query)
                             if 'uddg' in url_params:
