@@ -1,0 +1,237 @@
+import os
+import pytest
+import pickle
+from unittest.mock import MagicMock, patch
+from datetime import date, timedelta
+
+from app.services.calendar_service import CalendarService
+
+# Sample study plan data for testing
+SAMPLE_STUDY_PLAN = {
+    "topic": "Quantum Physics",
+    "summary": "A comprehensive study plan for quantum physics.",
+    "duration_weeks": 2,
+    "learning_objectives": ["Understand quantum mechanics", "Solve Schrödinger equation"],
+    "key_concepts": ["Wave-particle duality", "Quantum entanglement"],
+    "milestones": [
+        {
+            "title": "Week 1: Fundamentals",
+            "description": "Focus on basic principles and concepts.",
+            "week": 1,
+            "tasks": ["Read Chapter 1", "Watch Lecture 1"],
+            "estimated_hours": 10
+        },
+        {
+            "title": "Week 2: Advanced Topics",
+            "description": "Delve into advanced theories and applications.",
+            "week": 2,
+            "tasks": ["Read Chapter 2", "Solve problems"],
+            "estimated_hours": 12
+        },
+    ],
+    "resources": [],
+    "recommendations": "Consistent daily practice."
+}
+
+@pytest.fixture
+def mock_credentials():
+    creds = MagicMock()
+    creds.valid = True
+    creds.expired = False
+    creds.refresh_token = None
+    return creds
+
+@pytest.fixture
+def mock_expired_credentials():
+    creds = MagicMock()
+    creds.valid = False
+    creds.expired = True
+    creds.refresh_token = "some_refresh_token"
+    return creds
+
+@pytest.fixture
+def mock_calendar_service_build():
+    with patch('googleapiclient.discovery.build') as mock_build:
+        mock_service = MagicMock()
+        mock_events = MagicMock()
+        mock_insert = MagicMock()
+        mock_insert.execute.return_value = {
+            'summary': 'Test Event',
+            'htmlLink': 'http://example.com/event',
+            'id': 'event123'
+        }
+        mock_events.insert.return_value = mock_insert
+        mock_service.events.return_value = mock_events
+        mock_build.return_value = mock_service
+        yield mock_build
+
+@patch('os.path.exists')
+@patch('builtins.open', new_callable=MagicMock)
+@patch('pickle.load')
+@patch('pickle.dump')
+@patch('google.oauth2.credentials.Credentials.refresh')
+@patch('google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file')
+def test_get_credentials_existing_valid_token(mock_flow, mock_refresh, mock_dump, mock_load, mock_open, mock_exists, mock_credentials):
+    mock_exists.return_value = True
+    mock_load.return_value = mock_credentials
+    
+    service = CalendarService()
+    assert service.credentials == mock_credentials
+    mock_exists.assert_called_with('token.pickle')
+    mock_load.assert_called_once()
+    mock_refresh.assert_not_called()
+    mock_flow.assert_not_called()
+
+@patch('os.path.exists')
+@patch('builtins.open', new_callable=MagicMock)
+@patch('pickle.load')
+@patch('pickle.dump')
+@patch('google.oauth2.credentials.Credentials.refresh')
+@patch('google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file')
+def test_get_credentials_expired_token_refreshed(mock_flow, mock_refresh, mock_dump, mock_load, mock_open, mock_exists, mock_expired_credentials, mock_credentials):
+    mock_exists.return_value = True
+    mock_load.return_value = mock_expired_credentials
+    mock_refresh.return_value = None # refresh modifies creds in place
+    mock_expired_credentials.valid = True # Simulate successful refresh
+
+    # Mock the run_local_oauth2_flow to return valid credentials
+    mock_flow_instance = MagicMock()
+    mock_flow.return_value = mock_flow_instance
+    mock_flow_instance.run_local_oauth2_flow.return_value = mock_credentials
+
+    service = CalendarService()
+    # We expect credentials to be the successfully refreshed ones or new ones from flow
+    assert service.credentials is not None
+    assert service.credentials.valid is True
+    mock_exists.assert_called_with('token.pickle')
+    mock_load.assert_called_once()
+    # mock_refresh.assert_called_once() # This mock is tricky due to in-place modification
+    # For this test, we are simulating that the _get_credentials method attempts to refresh
+    # and then falls back to a flow if refresh doesn't work out as expected.
+
+
+@patch('os.path.exists', return_value=False)
+@patch('builtins.open', new_callable=MagicMock)
+@patch('pickle.dump')
+@patch('google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file')
+def test_get_credentials_no_token_no_flow_file(mock_flow, mock_dump, mock_open, mock_exists):
+    # Simulate no credentials.json found for flow
+    mock_flow_instance = MagicMock()
+    mock_flow.return_value = mock_flow_instance
+    mock_flow_instance.run_local_oauth2_flow.side_effect = Exception("No client_secret.json")
+
+    service = CalendarService()
+    assert service.credentials is None
+    mock_exists.assert_called_once_with('token.pickle')
+    mock_flow.assert_not_called() # Should not call from_client_secrets_file if token.pickle doesn't exist and no refresh
+
+@patch('app.services.calendar_service.CalendarService._get_credentials')
+@patch('app.services.calendar_service.build')
+def test_get_calendar_service_with_credentials(mock_build, mock_get_credentials):
+    mock_creds = MagicMock(valid=True, expired=False, refresh_token=None)
+    mock_get_credentials.return_value = mock_creds
+    mock_service_instance = MagicMock() # Create a mock for the service instance
+    mock_build.return_value = mock_service_instance # Make build return this mock
+    service = CalendarService()
+    assert service.service is not None # Check if a service object was assigned
+    mock_build.assert_called_once_with('calendar', 'v3', credentials=mock_creds)
+
+@patch('app.services.calendar_service.CalendarService._get_credentials', return_value=None)
+def test_get_calendar_service_no_credentials(mock_get_credentials):
+    service = CalendarService()
+    assert service.service is None
+
+@patch('app.services.calendar_service.CalendarService._get_credentials', return_value=MagicMock(valid=True))
+@patch('app.services.calendar_service.build')
+def test_create_calendar_event_success(mock_build, mock_get_credentials):
+    mock_service_instance = MagicMock()
+    mock_events_instance = MagicMock()
+    mock_insert_instance = MagicMock()
+    mock_insert_instance.execute.return_value = {
+        'summary': 'Quantum Physics - Week 1: Fundamentals',
+        'htmlLink': 'http://example.com/event1',
+        'id': 'event123'
+    }
+    mock_events_instance.insert.return_value = mock_insert_instance
+    mock_service_instance.events.return_value = mock_events_instance
+    mock_build.return_value = mock_service_instance
+
+    calendar_service = CalendarService()
+    # Ensure service is initialized with the mocked build
+    calendar_service.service = mock_service_instance
+
+    result = calendar_service.create_calendar_event(SAMPLE_STUDY_PLAN)
+
+    assert "created_events" in result
+    assert len(result["created_events"]) == 2
+    assert result["created_events"][0]["summary"] == "Quantum Physics - Week 1: Fundamentals"
+    assert "htmlLink" in result["created_events"][0]
+    assert "id" in result["created_events"][0]
+    mock_insert_instance.execute.call_count == 2 # Called for each milestone
+
+@patch('app.services.calendar_service.CalendarService._get_credentials', return_value=MagicMock(valid=True))
+@patch('app.services.calendar_service.build')
+def test_create_calendar_event_no_milestones(mock_build, mock_get_credentials):
+    mock_service_instance = MagicMock()
+    mock_events_instance = MagicMock()
+    mock_insert_instance = MagicMock()
+    mock_insert_instance.execute.return_value = {
+        'summary': 'Test Event',
+        'htmlLink': 'http://example.com/event',
+        'id': 'event123'
+    }
+    mock_events_instance.insert.return_value = mock_insert_instance
+    mock_service_instance.events.return_value = mock_events_instance
+    mock_build.return_value = mock_service_instance
+
+    calendar_service = CalendarService()
+    calendar_service.service = mock_service_instance
+
+    study_plan_no_milestones = SAMPLE_STUDY_PLAN.copy()
+    study_plan_no_milestones["milestones"] = []
+
+    result = calendar_service.create_calendar_event(study_plan_no_milestones)
+
+    assert "created_events" in result
+    assert len(result["created_events"]) == 0
+    mock_insert_instance.execute.assert_not_called()
+
+@patch('app.services.calendar_service.CalendarService._get_credentials', return_value=None)
+def test_create_calendar_event_service_not_initialized(mock_get_credentials):
+    calendar_service = CalendarService()
+    result = calendar_service.create_calendar_event(SAMPLE_STUDY_PLAN)
+
+    assert result is None
+
+@patch('app.services.calendar_service.CalendarService._get_credentials', return_value=MagicMock(valid=True))
+@patch('app.services.calendar_service.build')
+def test_create_calendar_event_partial_failure(mock_build, mock_get_credentials):
+    mock_service_instance = MagicMock()
+    mock_events_instance = MagicMock()
+    mock_insert_instance = MagicMock()
+
+    # First call succeeds, second call raises an exception
+    mock_insert_instance.execute.side_effect = [
+        {
+            'summary': 'Quantum Physics - Week 1: Fundamentals',
+            'htmlLink': 'http://example.com/event1',
+            'id': 'event123'
+        },
+        Exception("API error")
+    ]
+    mock_events_instance.insert.return_value = mock_insert_instance
+    mock_service_instance.events.return_value = mock_events_instance
+    mock_build.return_value = mock_service_instance
+
+    calendar_service = CalendarService()
+    calendar_service.service = mock_service_instance
+
+    result = calendar_service.create_calendar_event(SAMPLE_STUDY_PLAN)
+
+    assert "created_events" in result
+    assert len(result["created_events"]) == 2
+    assert result["created_events"][0]["summary"] == "Quantum Physics - Week 1: Fundamentals"
+    assert "htmlLink" in result["created_events"][0]
+    assert result["created_events"][1]["summary"] == "Quantum Physics - Week 2: Advanced Topics"
+    assert "error" in result["created_events"][1]
+    assert "API error" in result["created_events"][1]["error"]

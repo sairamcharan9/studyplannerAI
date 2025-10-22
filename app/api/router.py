@@ -1,13 +1,40 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Request, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 
 from app.services.research_service import ResearchService
 from app.services.study_plan_service import StudyPlanService
 from app.services.ai_service_factory import get_ai_service
+from app.services.auth_service import AuthService, get_auth_service # New import for authentication
+from app.services.calendar_service import CalendarService, get_calendar_service
+
+# Initialize Jinja2Templates
+templates = Jinja2Templates(directory="templates")
 
 # Create router
 router = APIRouter(tags=["studyplanner"])
+
+# Login/Logout Routes
+@router.get("/login", response_class=HTMLResponse)
+async def login(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@router.post("/login", response_class=HTMLResponse)
+async def login_post(request: Request, username: str = Form(...), password: str = Form(...), auth_service: AuthService = Depends(get_auth_service)):
+    user = await auth_service.authenticate_user(username, password)
+    if not user:
+        return templates.TemplateResponse("login.html", {"request": request, "error_message": "Invalid credentials"})
+    
+    response = RedirectResponse(url="/", status_code=302)
+    response.set_cookie(key="session_token", value=user.username)
+    return response
+
+@router.get("/logout")
+async def logout(response: RedirectResponse = RedirectResponse(url="/", status_code=302)):
+    response.delete_cookie("session_token")
+    return response
 
 # Pydantic models for request/response
 class StudyPlanRequest(BaseModel):
@@ -43,6 +70,7 @@ class StudyPlanResponse(BaseModel):
     milestones: List[MilestoneItem]
     resources: Optional[List[ResourceItem]] = None
     recommendations: Optional[str] = None
+    calendar_events_info: Optional[Dict[str, Any]] = None
 
 # Dependencies
 def get_research_service():
@@ -51,6 +79,9 @@ def get_research_service():
 def get_study_plan_service():
     return StudyPlanService()
 
+def get_calendar_service_dependency():
+    return CalendarService()
+
 # Routes
 @router.post("/generate-study-plan", response_model=StudyPlanResponse)
 async def generate_study_plan(
@@ -58,6 +89,7 @@ async def generate_study_plan(
     research_service: ResearchService = Depends(get_research_service),
     study_plan_service: StudyPlanService = Depends(get_study_plan_service),
     ai_service = Depends(get_ai_service),
+    calendar_service: CalendarService = Depends(get_calendar_service_dependency),
 ):
     """
     Generate a study plan based on research and user requirements.
@@ -80,6 +112,11 @@ async def generate_study_plan(
             generate_goals=request.generate_goals,
             additional_context=request.additional_context
         )
+
+        # 3. Add study plan to calendar
+        calendar_events_info = calendar_service.create_calendar_event(study_plan)
+        if calendar_events_info:
+            study_plan["calendar_events_info"] = calendar_events_info
         
         return study_plan
     except Exception as e:
