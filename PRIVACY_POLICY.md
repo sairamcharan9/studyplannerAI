@@ -50,7 +50,7 @@ You have the right to:
 *   Object to the processing of your data.
 *   Withdraw your consent at any time.
 
-To exercise these rights, please contact us at [Your Support Email/Link].
+To exercise these rights, please contact us at support@studyplannerai.com.
 
 ## 8. Changes to this Privacy Policy
 
@@ -58,4 +58,4 @@ We may update this Privacy Policy from time to time. We will notify you of any s
 
 ## 9. Contact Us
 
-If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at [Your Support Email/Link].
+If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at support@studyplannerai.com.
