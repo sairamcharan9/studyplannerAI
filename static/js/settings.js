@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch and populate initial settings
     async function loadInitialSettings() {
         try {
-            const response = await fetch('/settings');
+            const response = await fetch('/api/settings/get');
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
