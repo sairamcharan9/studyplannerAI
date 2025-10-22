@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('openrouter_model').value = settings.OPENROUTER_MODEL || '';
             document.getElementById('gemini_api_key').placeholder = settings.GEMINI_API_KEY ? '********' : '';
             document.getElementById('gemini_model').value = settings.GEMINI_MODEL || '';
+            document.getElementById('enable_facial_analysis').checked = settings.ENABLE_FACIAL_ANALYSIS === 'true';
 
             // Toggle settings visibility based on loaded provider
             toggleSettings(settings.AI_PROVIDER || 'ollama');

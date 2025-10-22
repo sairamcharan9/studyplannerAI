@@ -39,6 +39,10 @@ async def update_settings(form_data: dict):
             with open(".env", "w") as f:
                 pass  # Create an empty file
 
+        # Handle unchecked checkbox
+        if 'ENABLE_FACIAL_ANALYSIS' not in form_data:
+            set_key(".env", "ENABLE_FACIAL_ANALYSIS", "false")
+
         # Update each key from the form
         for key, value in form_data.items():
             if value:  # Only update if a value is provided
