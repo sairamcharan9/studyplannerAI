@@ -92,6 +92,21 @@ async def login(request: Request):
         {"request": request, "title": "Login - StudyplannerAI"}
     )
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/login")
+async def api_login(login_request: LoginRequest):
+    # Placeholder for authentication logic
+    if login_request.email == "user@example.com" and login_request.password == "password":
+        return {"success": True, "message": "Login successful!"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
 # Health check
 @app.get("/health")
 async def health_check():
