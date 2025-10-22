@@ -35,7 +35,7 @@ An AI-powered study plan generator that creates personalized learning roadmaps b
 3. Activate the virtual environment:
    - Windows:
      ```
-     venv\Scripts\activate
+     venv\Scripts\\activate
      ```
    - macOS/Linux:
      ```
@@ -144,8 +144,8 @@ The web interface uses Jinja2 templates located in the `templates` directory and
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions to StudyplannerAI! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to get started, report issues, and submit pull requests.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for full details.
