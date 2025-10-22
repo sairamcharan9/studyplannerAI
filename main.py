@@ -1,10 +1,11 @@
 import os
 import logging
 import sys
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
 # Import our app modules
@@ -90,6 +91,21 @@ async def login(request: Request):
         "login.html", 
         {"request": request, "title": "Login - StudyplannerAI"}
     )
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/login")
+async def api_login(login_request: LoginRequest):
+    # Placeholder for authentication logic
+    if login_request.email == "user@example.com" and login_request.password == "password":
+        return {"success": True, "message": "Login successful!"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
 
 # Health check
 @app.get("/health")

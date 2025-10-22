@@ -1,27 +1,13 @@
 import os
 import logging
-from app.services.ollama_service import OllamaService
-from app.services.openrouter_service import OpenRouterService
 from app.services.gemini_service import GeminiService
 
 logger = logging.getLogger(__name__)
 
 def get_ai_service():
     """
-    Factory function to get the AI service based on the environment variable.
+    Factory function to get the AI service.
+    Always returns GeminiService as it's the sole AI provider.
     """
-    ai_provider = os.getenv("AI_PROVIDER", "ollama").lower()
-    logger.info(f"AI_PROVIDER set to: {ai_provider}")
-
-    if ai_provider == "openrouter":
-        logger.info("Returning OpenRouterService")
-        return OpenRouterService()
-    elif ai_provider == "gemini":
-        logger.info("Returning GeminiService")
-        return GeminiService()
-    elif ai_provider == "ollama":
-        logger.info("Returning OllamaService")
-        return OllamaService()
-    else:
-        logger.warning(f"Invalid AI_PROVIDER '{ai_provider}'. Using OllamaService as default.")
-        return OllamaService()
+    logger.info("Returning GeminiService (sole AI provider)")
+    return GeminiService()

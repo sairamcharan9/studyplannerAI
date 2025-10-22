@@ -189,52 +189,52 @@ Return a JSON list of strings. For example: ["goal 1", "goal 2", "goal 3"]
         # Create a basic template plan with clear indication it's a placeholder
         placeholder_indicator = "[PLACEHOLDER CONTENT] " if is_disabled else "[FALLBACK TEMPLATE] "
 
-        return {{
+        return {
             "topic": topic,
-            "summary": f"{{placeholder_indicator}}A {{duration_weeks}}-week study plan for {{topic}}",
+            "summary": f"{placeholder_indicator}A {duration_weeks}-week study plan for {topic}",
             "duration_weeks": duration_weeks,
             "learning_objectives": [
-                f"Understand core concepts of {{topic}}",
-                f"Develop practical skills in {{topic}}",
-                f"Apply knowledge of {{topic}} to real-world scenarios"
+                f"Understand core concepts of {topic}",
+                f"Develop practical skills in {topic}",
+                f"Apply knowledge of {topic} to real-world scenarios"
             ],
-            "key_concepts": [f"{{topic}} fundamentals", f"{{topic}} applications", f"{{topic}} best practices"],
+            "key_concepts": [f"{topic} fundamentals", f"{topic} applications", f"{topic} best practices"],
             "milestones": [
-                {{
+                {
                     "title": "Week 1: Fundamentals",
-                    "description": f"Introduction to basic concepts of {{topic}}",
+                    "description": f"Introduction to basic concepts of {topic}",
                     "week": 1,
                     "tasks": ["Research core concepts", "Study foundational principles", "Take beginner tutorial"],
                     "estimated_hours": 10
-                }},
-                {{
-                    "title": f"Week {{duration_weeks//2}}: Intermediate Concepts",
-                    "description": f"Deepen understanding of {{topic}}",
+                },
+                {
+                    "title": f"Week {duration_weeks//2}: Intermediate Concepts",
+                    "description": f"Deepen understanding of {topic}",
                     "week": duration_weeks//2,
                     "tasks": ["Work on practical exercises", "Study intermediate materials", "Begin small project"],
                     "estimated_hours": 12
-                }},
-                {{
-                    "title": f"Week {{duration_weeks}}: Advanced Applications",
-                    "description": f"Master advanced aspects of {{topic}}",
+                },
+                {
+                    "title": f"Week {duration_weeks}: Advanced Applications",
+                    "description": f"Master advanced aspects of {topic}",
                     "week": duration_weeks,
                     "tasks": ["Complete project", "Review all materials", "Self-assessment"],
                     "estimated_hours": 15
-                }}
+                }
             ],
             "resources": [
-                {{
-                    "title": f"{{topic}} - Official Documentation",
+                {
+                    "title": f"{topic} - Official Documentation",
                     "url": "",
                     "type": "documentation",
                     "description": "Official documentation and guides"
-                }},
-                {{
-                    "title": f"Introduction to {{topic}}",
+                },
+                {
+                    "title": f"Introduction to {topic}",
                     "url": "",
                     "type": "course",
                     "description": "Beginner-friendly course"
-                }}
+                }
             ],
-            "recommendations": f"Focus on hands-on practice while studying {{topic}}. Consider joining relevant communities for support."
-        }}
+            "recommendations": f"Focus on hands-on practice while studying {topic}. Consider joining relevant communities for support."
+        }
