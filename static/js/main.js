@@ -12,6 +12,64 @@ document.addEventListener('DOMContentLoaded', function() {
     const printButton = document.getElementById('printButton');
     const downloadButton = document.getElementById('downloadButton');
     const newPlanButton = document.getElementById('newPlanButton');
+    const addToCalendarButton = document.getElementById('addToCalendarButton');
+    let currentStudyPlan = null;
+    const topicInput = document.getElementById('topic');
+    const suggestionsContainer = document.getElementById('suggestions-container');
+    let suggestionDebounceTimer;
+
+    // Handle topic input for smart suggestions
+    if (topicInput && suggestionsContainer) {
+        topicInput.addEventListener('input', () => {
+            clearTimeout(suggestionDebounceTimer);
+            suggestionDebounceTimer = setTimeout(async () => {
+                const query = topicInput.value.trim();
+                if (query.length > 2) {
+                    try {
+                        const response = await fetch(`/api/suggestions?query=${encodeURIComponent(query)}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        const suggestions = await response.json();
+                        displaySuggestions(suggestions);
+                    } catch (error) {
+                        console.error('Error fetching suggestions:', error);
+                        suggestionsContainer.classList.add('hidden');
+                    }
+                } else {
+                    suggestionsContainer.classList.add('hidden');
+                }
+            }, 300); // Debounce for 300ms
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!topicInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                suggestionsContainer.classList.add('hidden');
+            }
+        });
+    }
+
+    // Function to display suggestions
+    function displaySuggestions(suggestions) {
+        if (!suggestions || suggestions.length === 0) {
+            suggestionsContainer.classList.add('hidden');
+            return;
+        }
+
+        suggestionsContainer.innerHTML = '';
+        suggestions.forEach(suggestion => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'p-2 cursor-pointer hover:bg-gray-100';
+            suggestionItem.textContent = suggestion;
+            suggestionItem.addEventListener('click', () => {
+                topicInput.value = suggestion;
+                suggestionsContainer.classList.add('hidden');
+            });
+            suggestionsContainer.appendChild(suggestionItem);
+        });
+        suggestionsContainer.classList.remove('hidden');
+    }
 
     // Handle form submission
     if (studyPlanForm) {
@@ -36,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Convert FormData to JSON
             for (const [key, value] of formData.entries()) {
-                if (key === 'include_resources') {
+                if (key === 'include_resources' || key === 'generate_goals') {
                     jsonData[key] = value === 'on';
                 } else if (key === 'depth_level' || key === 'duration_weeks') {
                     jsonData[key] = parseInt(value, 10);
@@ -120,8 +178,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Handle "Add to Calendar" button
+    if (addToCalendarButton) {
+        addToCalendarButton.addEventListener('click', async () => {
+            if (!currentStudyPlan) {
+                alert('No study plan available to add to calendar.');
+                return;
+            }
+            try {
+                const response = await fetch('/api/generate-ics', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        topic: currentStudyPlan.topic,
+                        milestones: currentStudyPlan.milestones
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'study_plan.ics';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error generating calendar file:', error);
+                alert('Failed to generate calendar file. Please try again.');
+            }
+        });
+    }
+
     // Function to display results
     function displayResults(data) {
+        currentStudyPlan = data;
         // Set title and topic
         document.getElementById('resultTitle').textContent = `Study Plan: ${data.topic}`;
         document.getElementById('resultSubtitle').textContent = `${data.duration_weeks}-week study roadmap`;

@@ -67,10 +67,13 @@
                     <form id="studyPlanForm" class="space-y-6">
                         <div>
                             <label for="topic" class="block text-sm font-medium text-gray-700">Topic *</label>
-                            <div class="mt-1">
+                            <div class="mt-1 relative">
                                 <input type="text" name="topic" id="topic" required
                                     class="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                    placeholder="e.g., Machine Learning, Web Development, Python Programming">
+                                    placeholder="e.g., Machine Learning, Web Development, Python Programming"
+                                    autocomplete="off">
+                                <div id="suggestions-container" class="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 hidden shadow-lg">
+                                </div>
                             </div>
                             <p class="mt-1 text-xs text-gray-500">Enter the main topic you want to study</p>
                         </div>
@@ -157,6 +160,17 @@
                             </div>
                         </div>
 
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="generate_goals" name="generate_goals" type="checkbox"
+                                    class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="generate_goals" class="font-medium text-gray-700">Generate Smart Goals</label>
+                                <p class="text-gray-500">Let AI suggest learning goals for you.</p>
+                            </div>
+                        </div>
+
                         <div>
                             <button type="submit" 
                                 class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
@@ -222,6 +236,10 @@
                     <button id="downloadButton" 
                         class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <i class="fas fa-download mr-2"></i> Download as PDF
+                    </button>
+                    <button id="addToCalendarButton"
+                        class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fas fa-calendar-plus mr-2"></i> Add to Calendar
                     </button>
                     <button id="newPlanButton" 
                         class="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">

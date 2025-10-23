@@ -254,7 +254,7 @@ Create a detailed, structured study plan following this JSON format:
     }},
     ...more resources...
   ],
-  "recommendations": "Additional personalized recommendations based on learning style"
+  "recommendations": "Additional personalized recommendations based on learning style and prior knowledge. For instance, suggest hands-on projects for kinesthetic learners or foundational books for beginners."
 }}
 
 Return ONLY the valid JSON object, nothing else. Ensure all JSON is properly formatted and valid.
@@ -285,6 +285,32 @@ Return ONLY the valid JSON object, nothing else. Ensure all JSON is properly for
         except Exception as e:
             logger.error(f"Error creating study plan: {str(e)}")
             return self._generate_fallback_plan(topic, duration_weeks)
+
+    async def generate_learning_goals(self, topic: str, duration_weeks: int, prior_knowledge: Optional[str]) -> List[str]:
+        """
+        Generate a list of learning goals using OpenRouter.
+        """
+        prompt = f"""
+Based on the following information, generate 3-5 specific, actionable, and realistic learning goals for a study plan.
+
+Topic: {topic}
+Duration: {duration_weeks} weeks
+Prior Knowledge: {prior_knowledge or 'None'}
+
+Return a JSON list of strings. For example: ["goal 1", "goal 2", "goal 3"]
+"""
+        response = await self.generate_content(prompt)
+        try:
+            # Extract JSON from the response
+            json_start = response.find('[')
+            json_end = response.rfind(']') + 1
+            if json_start != -1 and json_end != -1:
+                goals_json = response[json_start:json_end]
+                return json.loads(goals_json)
+            return []
+        except json.JSONDecodeError:
+            logger.error("Failed to decode JSON from learning goals response.")
+            return []
     
     def _generate_fallback_plan(self, topic: str, duration_weeks: int, is_disabled: bool = False) -> Dict[str, Any]:
         """

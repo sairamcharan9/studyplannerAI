@@ -33,17 +33,11 @@ logger.info(f"Using AI generation: {os.getenv('USE_AI_GENERATION', 'true')}")
 logger.info(f"AI provider: {os.getenv('AI_PROVIDER', 'placeholder')}")
 
 # Log provider-specific configuration
-if os.getenv('AI_PROVIDER', '').lower() == 'openrouter':
-    logger.info(f"OpenRouter model: {os.getenv('OPENROUTER_MODEL', 'Not set')}")
-    # Mask API key for security
-    api_key = os.getenv('OPENROUTER_API_KEY', '')
-    masked_key = api_key[:8] + '...' if api_key else 'Not set'
-    logger.info(f"OpenRouter API key: {masked_key}")
-elif os.getenv('AI_PROVIDER', '').lower() == 'ollama':
-    logger.info(f"Ollama model: {os.getenv('OLLAMA_MODEL', 'Not set')}")
-    logger.info(f"Ollama host: {os.getenv('OLLAMA_HOST', 'Not set')}")
-else:
-    logger.info("Using placeholder generation (no AI)")
+logger.info(f"OpenRouter model: {os.getenv('OPENROUTER_MODEL', 'Not set')}")
+# Mask API key for security
+api_key = os.getenv('OPENROUTER_API_KEY', '')
+masked_key = api_key[:8] + '...' if api_key else 'Not set'
+logger.info(f"OpenRouter API key: {masked_key}")
 
 
 # Create FastAPI app
