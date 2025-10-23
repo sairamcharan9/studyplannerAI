@@ -4,7 +4,6 @@ from typing import List, Optional, Dict, Any
 
 from app.services.research_service import ResearchService
 from app.services.study_plan_service import StudyPlanService
-from app.services.ollama_service import OllamaService
 
 # Create router
 router = APIRouter(tags=["studyplanner"])
@@ -50,16 +49,12 @@ def get_research_service():
 def get_study_plan_service():
     return StudyPlanService()
 
-def get_ollama_service():
-    return OllamaService()
-
 # Routes
 @router.post("/generate-study-plan", response_model=StudyPlanResponse)
 async def generate_study_plan(
     request: StudyPlanRequest,
     research_service: ResearchService = Depends(get_research_service),
     study_plan_service: StudyPlanService = Depends(get_study_plan_service),
-    ollama_service: OllamaService = Depends(get_ollama_service),
 ):
     """
     Generate a study plan based on research and user requirements.

@@ -2,8 +2,7 @@ import os
 import logging
 from typing import Dict, Any, List, Optional
 from .research_service import ResearchService
-from .ollama_service import OllamaService
-from .openrouter_service import OpenRouterService
+from .gemini_service import GeminiService
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -16,11 +15,9 @@ class StudyPlanService:
     
     def __init__(self):
         self.research_service = ResearchService()
-        self.ollama_service = OllamaService()
-        self.openrouter_service = OpenRouterService()
+        self.gemini_service = GeminiService()
         
-        # Determine which AI provider to use based on configuration
-        self.ai_provider = os.getenv("AI_PROVIDER", "ollama").lower()
+        self.ai_provider = "gemini"
         logger.info(f"Study plan service initialized with AI provider: {self.ai_provider}")
     
     async def generate_plan(self,
@@ -54,87 +51,54 @@ class StudyPlanService:
             logger.info(f"Generating study plan for topic: {topic}")
             logger.info(f"Generation parameters: depth={depth_level}, duration={duration_weeks} weeks, learning_style={learning_style}, prior_knowledge={prior_knowledge}")
             
-            # Check if we're using AI or placeholders
             use_ai = os.getenv("USE_AI_GENERATION", "true").lower() in ["true", "1", "yes"]
             
             if use_ai:
-                if self.ai_provider == "openrouter":
-                    # Generate the study plan using OpenRouter (Gemini)
-                    logger.info(f"Attempting to generate study plan using OpenRouter model: {self.openrouter_service.model}")
-                    study_plan = await self.openrouter_service.create_study_plan(
-                        topic=topic,
-                        research_data=research_data,
-                        duration_weeks=duration_weeks,
-                        depth_level=depth_level,
-                        learning_style=learning_style,
-                        prior_knowledge=prior_knowledge
-                    )
-                    generation_method = "OPENROUTER-GEMINI"
-                else:
-                    # Generate the study plan using Ollama
-                    logger.info(f"Attempting to generate study plan using Ollama model: {self.ollama_service.model}")
-                    study_plan = await self.ollama_service.create_study_plan(
-                        topic=topic,
-                        research_data=research_data,
-                        duration_weeks=duration_weeks,
-                        depth_level=depth_level,
-                        learning_style=learning_style,
-                        prior_knowledge=prior_knowledge
-                    )
-                    generation_method = "OLLAMA"
+                logger.info(f"Attempting to generate study plan using Gemini model: {self.gemini_service.model}")
+                study_plan = await self.gemini_service.create_study_plan(
+                    topic=topic,
+                    research_data=research_data,
+                    duration_weeks=duration_weeks,
+                    depth_level=depth_level,
+                    learning_style=learning_style,
+                    prior_knowledge=prior_knowledge
+                )
+                generation_method = "GEMINI"
             else:
-                # Skip Ollama and use placeholders directly
                 logger.warning(f"AI generation disabled by environment setting. Using PLACEHOLDER generation.")
                 study_plan = self._create_fallback_plan(topic, duration_weeks)
                 generation_method = "PLACEHOLDER"
             
-            # Check if this is actually a fallback template by looking for markers in the summary
             is_fallback = False
             if "summary" in study_plan and ("[FALLBACK TEMPLATE]" in study_plan["summary"] or "[PLACEHOLDER CONTENT]" in study_plan["summary"]):
                 is_fallback = True
                 generation_method = "PLACEHOLDER"
                 
-            # Add generation method to the plan (only if not already marked by the fallback system)
             if "summary" in study_plan and not is_fallback:
                 study_plan["summary"] = f"[Generated using: {generation_method}] " + study_plan["summary"]
                 
-            # Enhance the plan with goals if provided
             if goals and isinstance(goals, list) and len(goals) > 0:
                 if "learning_objectives" in study_plan:
-                    # Merge user goals with generated objectives
                     existing_objectives = study_plan["learning_objectives"]
                     merged_objectives = list(set(existing_objectives + goals))
-                    study_plan["learning_objectives"] = merged_objectives[:10]  # Limit to top 10
+                    study_plan["learning_objectives"] = merged_objectives[:10]
             
-            # Add any additional context as recommendations
             if additional_context and "recommendations" in study_plan:
                 study_plan["recommendations"] += f"\n\nAdditional context considered: {additional_context}"
             
-            # Remove resources if not requested
             if not include_resources and "resources" in study_plan:
                 study_plan.pop("resources")
             
-            # Report the correct AI provider that was used
-            if self.ai_provider == "openrouter":
-                if is_fallback or generation_method == "PLACEHOLDER":
-                    logger.info(f"Successfully generated study plan using PLACEHOLDER templates")
-                else:
-                    model_name = self.openrouter_service.model
-                    logger.info(f"Successfully generated study plan using OpenRouter with model: {model_name}")
-            elif self.ai_provider == "ollama":
-                if is_fallback or generation_method == "PLACEHOLDER":
-                    logger.info(f"Successfully generated study plan using PLACEHOLDER templates")
-                else:
-                    model_name = self.ollama_service.model
-                    logger.info(f"Successfully generated study plan using Ollama with model: {model_name}")
-            else:
+            if is_fallback or generation_method == "PLACEHOLDER":
                 logger.info(f"Successfully generated study plan using PLACEHOLDER templates")
-                
+            else:
+                model_name = self.gemini_service.model
+                logger.info(f"Successfully generated study plan using Gemini with model: {model_name}")
+
             return study_plan
             
         except Exception as e:
             logger.error(f"Error generating study plan: {str(e)}")
-            # Generate a fallback study plan
             logger.warning(f"Falling back to template-based study plan generation for topic: {topic}")
             return self._create_fallback_plan(topic, duration_weeks)
     
@@ -146,7 +110,6 @@ class StudyPlanService:
             logger.warning(f"FALLBACK MODE: Using BUILT-IN TEMPLATE generation (no AI model) for topic: {topic}")
         else:
             logger.info(f"PLACEHOLDER MODE: Using BUILT-IN TEMPLATE generation by configuration for topic: {topic}")
-        # Simple fallback plan structure
         weeks = [
             {"week": 1, "focus": "Fundamentals and Core Concepts"},
             {"week": 2, "focus": "Intermediate Concepts and Applications"},
@@ -154,18 +117,15 @@ class StudyPlanService:
             {"week": 4, "focus": "Projects and Real-world Implementation"}
         ]
         
-        # Adjust for requested duration
         if duration_weeks < 4:
             weeks = weeks[:duration_weeks]
         elif duration_weeks > 4:
-            # Add additional weeks
             for i in range(5, duration_weeks + 1):
                 if i <= duration_weeks / 2:
                     weeks.append({"week": i, "focus": "Further Skills Development"})
                 else:
                     weeks.append({"week": i, "focus": "Specialization and Mastery"})
         
-        # Build the milestones
         milestones = []
         for week in weeks:
             milestones.append({
@@ -177,10 +137,9 @@ class StudyPlanService:
                     f"Complete practice exercises",
                     f"Review and solidify understanding"
                 ],
-                "estimated_hours": 10 + (week['week'] % 2)  # Alternate between 10 and 11 hours
+                "estimated_hours": 10 + (week['week'] % 2)
             })
         
-        # Construct the fallback plan
         return {
             "topic": topic,
             "summary": f"A structured {duration_weeks}-week study plan for mastering {topic}, covering fundamentals through advanced concepts.",
