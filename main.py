@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from app.api.router import router as api_router
 from app.api.settings_router import router as settings_router
 from app.api.facial_analysis_router import facial_analysis_router
+from app.api.image_router import router as image_router
 
 # Load environment variables
 load_dotenv()
@@ -74,6 +75,7 @@ templates = Jinja2Templates(directory="templates")
 app.include_router(api_router, prefix="/api")
 app.include_router(settings_router)
 app.include_router(facial_analysis_router, prefix="/api")
+app.include_router(image_router, prefix="/api")
 
 # Root route
 @app.get("/")
