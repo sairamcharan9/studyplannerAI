@@ -31,6 +31,19 @@ async def get_settings_page(request: Request):
 
     return templates.TemplateResponse("settings.html", {"request": request, "settings": masked_settings})
 
+@router.get("/api/settings/get")
+async def get_settings_json():
+    """Get settings as JSON for the settings page to load."""
+    settings = get_settings()
+    # Mask API keys for security
+    masked_settings = settings.copy()
+    if "OPENROUTER_API_KEY" in masked_settings:
+        masked_settings["OPENROUTER_API_KEY"] = mask_api_key(masked_settings["OPENROUTER_API_KEY"])
+    if "GEMINI_API_KEY" in masked_settings:
+        masked_settings["GEMINI_API_KEY"] = mask_api_key(masked_settings["GEMINI_API_KEY"])
+    
+    return JSONResponse(content=masked_settings)
+
 @router.post("/settings")
 async def update_settings(form_data: dict):
     try:
