@@ -22,9 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log('Attempting to log in with:', { email, password });
 
-            // In a real application, you would send this data to your backend API
-            // Example fetch call (replace with your actual API endpoint and method)
-            /*
             fetch('/api/login', {
                 method: 'POST',
                 headers: {
@@ -45,13 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
                 alert('An error occurred during login. Please try again.');
             });
-            */
-
-            alert('Login form submitted (client-side validation passed). Backend integration is pending.');
-            // For demonstration, redirect after a short delay
-            // setTimeout(() => {
-            //     window.location.href = '/';
-            // }, 1000);
         });
     }
 });
