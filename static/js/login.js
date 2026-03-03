@@ -15,43 +15,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(email)) {
-                alert('Please enter a valid email address.');
-                return;
-            }
+            console.log('Attempting to log in with:', { email });
 
-            console.log('Attempting to log in with:', { email, password });
-
-            // In a real application, you would send this data to your backend API
-            // Example fetch call (replace with your actual API endpoint and method)
-            /*
+            // Send data to backend API
             fetch('/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ identifier: email, password: password }),
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Login successful!');
-                    window.location.href = '/dashboard'; // Redirect to a dashboard page
-                } else {
-                    alert('Login failed: ' + data.message);
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        let errorMessage = 'Login failed';
+                        if (err.detail) {
+                            if (Array.isArray(err.detail)) {
+                                // FastAPI validation error (422)
+                                errorMessage = err.detail.map(e => e.msg).join(', ');
+                            } else {
+                                errorMessage = err.detail;
+                            }
+                        }
+                        throw new Error(errorMessage);
+                    });
                 }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Login successful:', data);
+                // Store user info in localStorage for persistence (simple demo approach)
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/'; // Redirect to the home page
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred during login. Please try again.');
+                alert(error.message);
             });
-            */
-
-            alert('Login form submitted (client-side validation passed). Backend integration is pending.');
-            // For demonstration, redirect after a short delay
-            // setTimeout(() => {
-            //     window.location.href = '/';
-            // }, 1000);
         });
     }
 });
